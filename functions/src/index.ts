@@ -1,5 +1,4 @@
 import * as admin from 'firebase-admin'
-import * as fs from 'fs'
 import * as functions from 'firebase-functions'
 import * as md5File from 'md5-file'
 import * as os from 'os'
