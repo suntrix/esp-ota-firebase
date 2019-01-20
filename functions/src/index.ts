@@ -54,7 +54,7 @@ export const update = functions.https.onRequest((request, response) => {
                 return storage.bucket().file(filePath).download({
                     destination: tempFilePath,
                 }).then(() => {
-                    console.log('file downloaded locally to: ', tempFilePath)
+                    console.log('file downloaded locally to', tempFilePath)
 
                     const firmwareMD5 = md5File.sync(tempFilePath)
                     console.log('firmwareMD5', firmwareMD5)
