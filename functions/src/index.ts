@@ -31,9 +31,12 @@ export const update = functions.https.onRequest((request, response) => {
     ) {
         return response.status(403).send('Only for ESP8266 updater!')
     }
-
+    
     const espStaMac = request.header('x-esp8266-sta-mac')
     const currentFirmwareMD5 = request.header('x-esp8266-sketch-md5')
+
+    // const espStaMac = '68:C6:3A:CA:7B:A2'
+    // const currentFirmwareMD5 = '3e3e3093a2d79736e35812828277401c'
 
     return firestore.collection('devices').doc(espStaMac).get()
         .then(doc => {
@@ -53,7 +56,7 @@ export const update = functions.https.onRequest((request, response) => {
 
                 return storage.bucket().file(filePath).download({
                     destination: tempFilePath,
-                }).then(() => {
+                }).then(buffer => {
                     console.log('file downloaded locally to', tempFilePath)
 
                     const firmwareMD5 = md5File.sync(tempFilePath)
@@ -61,11 +64,13 @@ export const update = functions.https.onRequest((request, response) => {
                     console.log('currentFirmwareMD5', currentFirmwareMD5)
 
                     if (currentFirmwareMD5 === firmwareMD5) {
+                        console.log('MD5s are the same, nothing to do here.')
+
                         return response.sendStatus(304)
                     } else {
-                        response.contentType('application/octet-stream')
-                        response.attachment(fileName)
-                        response.sendFile(tempFilePath)
+                        console.log('MD5s are different, sending file', tempFilePath)
+
+                        response.contentType('application/octet-stream').attachment(fileName).sendFile(tempFilePath)
 
                         return true
                     }
